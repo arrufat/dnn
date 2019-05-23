@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# MNIST files
+/mnist/*ubyte
+
+# Build directory
+/build
+
+# Compile commands for auto completion
+/compile_commands.json
