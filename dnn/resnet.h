@@ -6,13 +6,13 @@ namespace dnn
 {
     // resnet 18
     template<typename SUBNET>
-    using resnet18_level1 = resblock512<resblock_down<512, SUBNET>>;
+    using resnet18_level1 = resbasicblock512<resbasicblock_down<512, SUBNET>>;
     template<typename SUBNET>
-    using resnet18_level2 = resblock256<resblock_down<256, SUBNET>>;
+    using resnet18_level2 = resbasicblock256<resbasicblock_down<256, SUBNET>>;
     template<typename SUBNET>
-    using resnet18_level3 = resblock128<resblock_down<128, SUBNET>>;
+    using resnet18_level3 = resbasicblock128<resbasicblock_down<128, SUBNET>>;
     template<typename SUBNET>
-    using resnet18_level4 = repeat<2, resblock64, SUBNET>;
+    using resnet18_level4 = repeat<2, resbasicblock64, SUBNET>;
     // the resnet 18 backbone
     template<typename INPUT>
     using resnet18_backbone = avg_pool_everything<
@@ -27,13 +27,13 @@ namespace dnn
 
     // resnet 34
     template<typename SUBNET>
-    using resnet34_level1 = repeat<2, resblock512, resblock_down<512, SUBNET>>;
+    using resnet34_level1 = repeat<2, resbasicblock512, resbasicblock_down<512, SUBNET>>;
     template<typename SUBNET>
-    using resnet34_level2 = repeat<5, resblock256, resblock_down<256, SUBNET>>;
+    using resnet34_level2 = repeat<5, resbasicblock256, resbasicblock_down<256, SUBNET>>;
     template<typename SUBNET>
-    using resnet34_level3 = repeat<3, resblock128, resblock_down<128, SUBNET>>;
+    using resnet34_level3 = repeat<3, resbasicblock128, resbasicblock_down<128, SUBNET>>;
     template<typename SUBNET>
-    using resnet34_level4 = repeat<3, resblock64, SUBNET>;
+    using resnet34_level4 = repeat<3, resbasicblock64, SUBNET>;
     // the resnet 34 backbone
     template<typename INPUT>
     using resnet34_backbone = avg_pool_everything<
