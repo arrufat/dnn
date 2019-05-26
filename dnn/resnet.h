@@ -6,7 +6,7 @@ namespace dnn
 {
     // common input for standard resnets
     template<typename INPUT>
-    using resnet_input = max_pool<3, 2, 1, relu<bn_con<conv<64, 7, 2, 3, INPUT>>>>;
+    using resnet_input = max_poolp<3, 2, 1, relu<bn_con<conp<64, 7, 2, 3, INPUT>>>>;
     // resnet 18
     template<typename SUBNET>
     using resnet18_level1 = resbasicblock512<resbasicblock_down<512, SUBNET>>;

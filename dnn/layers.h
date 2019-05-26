@@ -12,19 +12,23 @@ namespace dnn
 
     // a convolution with square parameters and padding setting
     template<long num_filters, long kernel_size, int stride, int padding, typename SUBNET>
-    using conv = add_layer<dlib::con_<num_filters, kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using conp = add_layer<dlib::con_<num_filters, kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using dlib::con;
 
     // a deconvolution with square parameters and padding setting
     template<long num_filters, long kernel_size, int stride, int padding, typename SUBNET>
-    using deconv = dlib::add_layer<dlib::cont_<num_filters, kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using contp = dlib::add_layer<dlib::cont_<num_filters, kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using dlib::cont;
 
     // a square max pooling with custom stride
     template<long kernel_size, int stride, int padding, typename SUBNET>
-    using max_pool = add_layer<dlib::max_pool_<kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using max_poolp = add_layer<dlib::max_pool_<kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using dlib::max_pool;
 
     // a square avg pooling with custom stride
     template<long kernel_size, int stride, int padding, typename SUBNET>
-    using avg_pool = add_layer<dlib::avg_pool_<kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using avg_poolp = add_layer<dlib::avg_pool_<kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
+    using dlib::avg_pool;
 
     // average and max pooling for everything
     using dlib::avg_pool_everything, dlib::max_pool_everything;
