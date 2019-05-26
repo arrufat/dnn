@@ -36,6 +36,7 @@
 
 # Build directory
 /build
+/.ccls-cache
 
 # Compile commands for auto completion
 /compile_commands.json
