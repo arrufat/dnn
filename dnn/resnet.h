@@ -4,6 +4,9 @@
 
 namespace dnn
 {
+    // common input for standard resnets
+    template<typename INPUT>
+    using resnet_input = max_pool<3, 2, 1, relu<bn_con<conv<64, 7, 2, 3, INPUT>>>>;
     // resnet 18
     template<typename SUBNET>
     using resnet18_level1 = resbasicblock512<resbasicblock_down<512, SUBNET>>;
@@ -20,9 +23,7 @@ namespace dnn
         resnet18_level2<
         resnet18_level3<
         resnet18_level4<
-        max_pool<3, 2, 1, relu<bn_con<conv<64, 7, 2, 1,
-        INPUT
-        >>>>>>>>>;
+        resnet_input<INPUT>>>>>>;
     using resnet18_t = loss_multiclass_log<fc<1000, resnet18_backbone<input_rgb_image>>>;
 
     // resnet 34
@@ -41,9 +42,7 @@ namespace dnn
         resnet34_level2<
         resnet34_level3<
         resnet34_level4<
-        max_pool<3, 2, 1, relu<bn_con<conv<64, 7, 2, 1,
-        INPUT
-        >>>>>>>>>;
+        resnet_input<INPUT>>>>>>;
     using resnet34_t = loss_multiclass_log<fc<1000, resnet34_backbone<input_rgb_image>>>;
 
     // resnet 50
@@ -62,9 +61,7 @@ namespace dnn
         resnet50_level2<
         resnet50_level3<
         resnet50_level4<
-        max_pool<3, 2, 1, relu<bn_con<conv<64, 7, 2, 1,
-        INPUT
-        >>>>>>>>>;
+        resnet_input<INPUT>>>>>>;
     using resnet50_t = loss_multiclass_log<fc<1000, resnet50_backbone<input_rgb_image>>>;
 
     // resnet 101
@@ -83,9 +80,7 @@ namespace dnn
         resnet101_level2<
         resnet101_level3<
         resnet101_level4<
-        max_pool<3, 2, 1, relu<bn_con<conv<64, 7, 2, 1,
-        INPUT
-        >>>>>>>>>;
+        resnet_input<INPUT>>>>>>;
     using resnet101_t = loss_multiclass_log<fc<1000, resnet101_backbone<input_rgb_image>>>;
 
     // resnet 152
@@ -104,8 +99,6 @@ namespace dnn
         resnet152_level2<
         resnet152_level3<
         resnet152_level4<
-        max_pool<3, 2, 1, relu<bn_con<conv<64, 7, 2, 1,
-        INPUT
-        >>>>>>>>>;
+        resnet_input<INPUT>>>>>>;
     using resnet152_t = loss_multiclass_log<fc<1000, resnet152_backbone<input_rgb_image>>>;
 }
