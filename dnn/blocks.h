@@ -54,11 +54,11 @@ namespace dnn
     template<int num_filters, typename SUBNET>
     using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, bn_con, SUBNET>;
     template<int num_filters, typename SUBNET>
-    using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, affine, SUBNET>;
+    using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, bn_con, SUBNET>;
     template<int num_filters, typename SUBNET>
     using aresbasicblock_down = residual_block<residual_down, basicblock, num_filters, affine, SUBNET>;
     template<int num_filters, typename SUBNET>
-    using aresbottleneck_down = residual_block<residual_down, bottleneck, num_filters, bn_con, SUBNET>;
+    using aresbottleneck_down = residual_block<residual_down, bottleneck, num_filters, affine, SUBNET>;
 
     // some useful definitions to allow the use of the repeat layer
     template<typename SUBNET> using resbasicblock512 = residual_block<residual, basicblock, 512, bn_con, SUBNET>;
