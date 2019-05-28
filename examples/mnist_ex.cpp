@@ -96,6 +96,7 @@ int main(int argc, char** argv) try
     {
         std::cout << "\nPlease, specify at least one model to use." << std::endl;
         std::cout << "Use --list-models or --help for more information.\n" << std::endl;
+        return EXIT_FAILURE;
     }
 
     std::string model_name = parser.option("model").argument();
