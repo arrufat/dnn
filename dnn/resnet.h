@@ -1,6 +1,6 @@
 #pragma once
 
-#include "blocks.h"
+#include "layers.h"
 
 namespace dnn
 {
@@ -78,11 +78,12 @@ namespace dnn
     template<typename SUBNET> using aresbottleneck256 = residual_block<residual, bottleneck, 256, affine, SUBNET>;
     template<typename SUBNET> using aresbottleneck128 = residual_block<residual, bottleneck, 128, affine, SUBNET>;
     template<typename SUBNET> using aresbottleneck64 = residual_block<residual, bottleneck, 64, affine, SUBNET>;
+
     // common input for standard resnets
     template<typename INPUT>
-    using resnet_input = max_pool<3, 3, 2, 2, relu<bn_con<conp<64, 7, 2, 3, INPUT>>>>;
+    using resnet_input = max_pool<3, 3, 2, 2, relu<bn_con<con<64, 7, 7, 2, 2, INPUT>>>>;
     template<typename INPUT>
-    using aresnet_input = max_pool<3, 3, 2, 2, relu<affine<conp<64, 7, 2, 3, INPUT>>>>;
+    using aresnet_input = max_pool<3, 3, 2, 2, relu<affine<con<64, 7, 7, 2, 2, INPUT>>>>;
 
     // resnet 18
     template<typename SUBNET>
@@ -103,6 +104,25 @@ namespace dnn
         resnet_input<INPUT>>>>>>;
     using resnet18_t = loss_multiclass_log<fc<1000, resnet18_backbone<input_rgb_image>>>;
 
+    // resnet 18 affine
+    template<typename SUBNET>
+    using aresnet18_level1 = aresbasicblock512<aresbasicblock_down<512, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet18_level2 = aresbasicblock256<aresbasicblock_down<256, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet18_level3 = aresbasicblock128<aresbasicblock_down<128, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet18_level4 = repeat<2, aresbasicblock64, SUBNET>;
+    // the resnet 18 backbone
+    template<typename INPUT>
+    using aresnet18_backbone = avg_pool_everything<
+        aresnet18_level1<
+        aresnet18_level2<
+        aresnet18_level3<
+        aresnet18_level4<
+        aresnet_input<INPUT>>>>>>;
+    using aresnet18_t = loss_multiclass_log<fc<1000, aresnet18_backbone<input_rgb_image>>>;
+
     // resnet 34
     template<typename SUBNET>
     using resnet34_level1 = repeat<2, resbasicblock512, resbasicblock_down<512, SUBNET>>;
@@ -121,6 +141,25 @@ namespace dnn
         resnet34_level4<
         resnet_input<INPUT>>>>>>;
     using resnet34_t = loss_multiclass_log<fc<1000, resnet34_backbone<input_rgb_image>>>;
+
+    // resnet 34 affine
+    template<typename SUBNET>
+    using aresnet34_level1 = repeat<2, aresbasicblock512, aresbasicblock_down<512, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet34_level2 = repeat<5, aresbasicblock256, aresbasicblock_down<256, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet34_level3 = repeat<3, aresbasicblock128, aresbasicblock_down<128, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet34_level4 = repeat<3, aresbasicblock64, SUBNET>;
+    // the resnet 34 backbone
+    template<typename INPUT>
+    using aresnet34_backbone = avg_pool_everything<
+        aresnet34_level1<
+        aresnet34_level2<
+        aresnet34_level3<
+        aresnet34_level4<
+        aresnet_input<INPUT>>>>>>;
+    using aresnet34_t = loss_multiclass_log<fc<1000, aresnet34_backbone<input_rgb_image>>>;
 
     // resnet 50
     template<typename SUBNET>
@@ -179,6 +218,25 @@ namespace dnn
         resnet_input<INPUT>>>>>>;
     using resnet101_t = loss_multiclass_log<fc<1000, resnet101_backbone<input_rgb_image>>>;
 
+    // resnet 101 affine
+    template<typename SUBNET>
+    using aresnet101_level1 = repeat<2, aresbottleneck512, aresbottleneck_down<512, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet101_level2 = repeat<22, aresbottleneck256, aresbottleneck_down<256, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet101_level3 = repeat<3, aresbottleneck128, aresbottleneck_down<128, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet101_level4 = repeat<3, aresbottleneck64, SUBNET>;
+    // the resnet 101 backbone
+    template<typename INPUT>
+    using aresnet101_backbone = avg_pool_everything<
+        aresnet101_level1<
+        aresnet101_level2<
+        aresnet101_level3<
+        aresnet101_level4<
+        aresnet_input<INPUT>>>>>>;
+    using aresnet101_t = loss_multiclass_log<fc<1000, aresnet101_backbone<input_rgb_image>>>;
+
     // resnet 152
     template<typename SUBNET>
     using resnet152_level1 = repeat<2, resbottleneck512, resbottleneck_down<512, SUBNET>>;
@@ -197,4 +255,24 @@ namespace dnn
         resnet152_level4<
         resnet_input<INPUT>>>>>>;
     using resnet152_t = loss_multiclass_log<fc<1000, resnet152_backbone<input_rgb_image>>>;
+
+    // resnet 152 affine
+    template<typename SUBNET>
+    using aresnet152_level1 = repeat<2, aresbottleneck512, aresbottleneck_down<512, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet152_level2 = repeat<35, aresbottleneck256, aresbottleneck_down<256, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet152_level3 = repeat<7, aresbottleneck128, aresbottleneck_down<128, SUBNET>>;
+    template<typename SUBNET>
+    using aresnet152_level4 = repeat<3, aresbottleneck64, SUBNET>;
+    // the resnet 152 backbone
+    template<typename INPUT>
+    using aresnet152_backbone = avg_pool_everything<
+        aresnet152_level1<
+        aresnet152_level2<
+        aresnet152_level3<
+        aresnet152_level4<
+        aresnet_input<INPUT>>>>>>;
+    using aresnet152_t = loss_multiclass_log<fc<1000, aresnet152_backbone<input_rgb_image>>>;
+}
 }
