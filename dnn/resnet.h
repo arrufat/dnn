@@ -275,4 +275,3 @@ namespace dnn
         aresnet_input<INPUT>>>>>>;
     using aresnet152_t = loss_multiclass_log<fc<1000, aresnet152_backbone<input_rgb_image>>>;
 }
-}
