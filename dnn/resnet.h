@@ -64,6 +64,25 @@ namespace dnn
         resnet_input<INPUT>>>>>>;
     using resnet50_t = loss_multiclass_log<fc<1000, resnet50_backbone<input_rgb_image>>>;
 
+    // resnet 50 affine
+    template<typename SUBNET>
+    using resnet50_alevel1 = repeat<2, aresbottleneck512, aresbottleneck_down<512, SUBNET>>;
+    template<typename SUBNET>
+    using resnet50_alevel2 = repeat<5, aresbottleneck256, aresbottleneck_down<256, SUBNET>>;
+    template<typename SUBNET>
+    using resnet50_alevel3 = repeat<3, aresbottleneck128, aresbottleneck_down<128, SUBNET>>;
+    template<typename SUBNET>
+    using resnet50_alevel4 = repeat<3, aresbottleneck64, SUBNET>;
+    // the resnet 50 backbone
+    template<typename INPUT>
+    using resnet50_abackbone = avg_pool_everything<
+        resnet50_alevel1<
+        resnet50_alevel2<
+        resnet50_alevel3<
+        resnet50_alevel4<
+        resnet_input<INPUT>>>>>>;
+    using aresnet50_t = loss_multiclass_log<fc<1000, resnet50_abackbone<input_rgb_image>>>;
+
     // resnet 101
     template<typename SUBNET>
     using resnet101_level1 = repeat<2, resbottleneck512, resbottleneck_down<512, SUBNET>>;

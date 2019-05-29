@@ -12,7 +12,7 @@ namespace dnn
         int stride,
         typename SUBNET
     >
-    using basicblock = BN<conp<num_filters, 3, 1, 1, relu<BN<conp<num_filters, 3, stride, 1, SUBNET>>>>>;
+    using basicblock = BN<con<num_filters, 3, 3, 1, 1, relu<BN<con<num_filters, 3, 3, stride, stride, SUBNET>>>>>;
 
     // the resnet bottleneck block
     template<
@@ -21,7 +21,7 @@ namespace dnn
         int stride,
         typename SUBNET
     >
-    using bottleneck = bn_con<conp<4 * num_filters, 1, 1, 0, BN<conp<num_filters, 3, 1, 1, BN<conp<num_filters, 1, 1, 0, SUBNET>>>>>>;
+    using bottleneck = bn_con<con<4 * num_filters, 1, 1, 1, 1, BN<con<num_filters, 3, 3, 1, 1, BN<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>;
 
     // a residual making use of the skip layer mechanism
     template<
@@ -39,7 +39,7 @@ namespace dnn
         template<typename> class BN,
         typename SUBNET
     >
-    using residual_down = add_prev2<avg_poolp<2, 2, 1, skip1<tag2<BLOCK<num_filters, BN, 2, tag1<SUBNET>>>>>>;
+    using residual_down = add_prev2<avg_pool<2, 2, 2, 2, skip1<tag2<BLOCK<num_filters, BN, 2, tag1<SUBNET>>>>>>;
 
     // residual block with optional downsampling and batch normalization
     template<
