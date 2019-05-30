@@ -31,7 +31,7 @@ namespace dnn
     > // adds the block to the result of tag1 (the subnet)
     using residual = add_prev1<BLOCK<num_filters, BN, 1, tag1<SUBNET>>>;
 
-    // a residual that does subsampling (we need to subsample the output of the subnet, too
+    // a residual that does subsampling (we need to subsample the output of the subnet, too)
     template<
         template<int, template<typename> class, int, typename> class BLOCK,  // a basic or bottleneck block defined before
         int num_filters,
