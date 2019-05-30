@@ -40,3 +40,12 @@
 
 # Compile commands for auto completion
 /compile_commands.json
+
+# Neural network and sync files
+*.dat
+*.dnn
+*_sync
+*_sync_
+
+# Log files
+*.log
