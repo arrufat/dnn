@@ -20,7 +20,7 @@ namespace dnn
         int stride,
         typename SUBNET
     >
-    using bottleneck = bn_con<con<4 * num_filters, 1, 1, 1, 1, BN<con<num_filters, 3, 3, stride, stride, BN<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>;
+    using bottleneck = BN<con<4 * num_filters, 1, 1, 1, 1, relu<BN<con<num_filters, 3, 3, stride, stride, relu<BN<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>>>;
 
     // a residual making use of the skip layer mechanism
     template<
