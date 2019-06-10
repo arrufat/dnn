@@ -10,22 +10,22 @@ namespace dnn
     // fully connected layer
     using dlib::fc;
 
-    // a convolution with square parameters and padding setting
+    // a square convolution with custom padding
     template<long num_filters, long kernel_size, int stride, int padding, typename SUBNET>
     using conp = add_layer<dlib::con_<num_filters, kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
     using dlib::con;
 
-    // a deconvolution with square parameters and padding setting
+    // a square transposed convolution with custom padding
     template<long num_filters, long kernel_size, int stride, int padding, typename SUBNET>
     using contp = dlib::add_layer<dlib::cont_<num_filters, kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
     using dlib::cont;
 
-    // a square max pooling with custom stride
+    // a square max pooling with custom padding
     template<long kernel_size, int stride, int padding, typename SUBNET>
     using max_poolp = add_layer<dlib::max_pool_<kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
     using dlib::max_pool;
 
-    // a square avg pooling with custom stride
+    // a square avg pooling with custom padding
     template<long kernel_size, int stride, int padding, typename SUBNET>
     using avg_poolp = add_layer<dlib::avg_pool_<kernel_size, kernel_size, stride, stride, padding, padding>, SUBNET>;
     using dlib::avg_pool;
