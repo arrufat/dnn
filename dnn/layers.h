@@ -45,7 +45,20 @@ namespace dnn
     // layer repetition
     using dlib::repeat;
     // loss functions
-    using dlib::loss_multiclass_log;
+    using dlib::loss_binary_hinge,
+          dlib::loss_binary_log,
+          dlib::loss_dot,
+          dlib::loss_epsilon_insensitive,
+          dlib::loss_mean_squared,
+          dlib::loss_mean_squared_multioutput,
+          dlib::loss_mean_squared_per_pixel,
+          dlib::loss_metric,
+          dlib::loss_mmod,
+          dlib::loss_multiclass_log,
+          dlib::loss_multiclass_log_per_pixel,
+          dlib::loss_multiclass_log_per_pixel_weighted,
+          dlib::loss_multimulticlass_log,
+          dlib::loss_ranking;
     // input layers
     using dlib::input, dlib::input_rgb_image, dlib::input_rgb_image_sized;
 }
