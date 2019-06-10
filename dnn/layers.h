@@ -35,7 +35,7 @@ namespace dnn
     // batch normalization and affine
     using dlib::bn_con, dlib::bn_fc, dlib::affine;
     // activations
-    using dlib::relu;
+    using dlib::relu, dlib::sig, dlib::htan;
     // tag operations
     using dlib::tag1, dlib::tag2;
     // skip tagged layers
