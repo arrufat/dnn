@@ -67,9 +67,9 @@ namespace dnn::resnet
         template<typename SUBNET> using resbottleneck_128 = residual_block<residual, bottleneck, 128, bn_con, SUBNET>;
         template<typename SUBNET> using resbottleneck_64  = residual_block<residual, bottleneck,  64, bn_con, SUBNET>;
 
-        // common input for standard resnets
+        // common processing for standard resnet inputs
         template<typename INPUT>
-        using input_type = max_pool<3, 3, 2, 2, relu<bn_con<con<64, 7, 7, 2, 2, INPUT>>>>;
+        using input_processing = max_pool<3, 3, 2, 2, relu<bn_con<con<64, 7, 7, 2, 2, INPUT>>>>;
 
         // the resnet backbone with basicblocks
         template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
@@ -78,16 +78,16 @@ namespace dnn::resnet
             repeat<nf_256, resbasicblock_256, resbasicblock_down<256,
             repeat<nf_128, resbasicblock_128, resbasicblock_down<128,
             repeat<nf_64,  resbasicblock_64,
-            input_type<INPUT>>>>>>>>;
+            input_processing<INPUT>>>>>>>>;
 
-        // the resnet backbon with bottlenecks
+        // the resnet backbone with bottlenecks
         template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
         using backbone_bottleneck =
             repeat<nf_512, resbottleneck_512, resbottleneck_down<512,
             repeat<nf_256, resbottleneck_256, resbottleneck_down<256,
             repeat<nf_128, resbottleneck_128, resbottleneck_down<128,
             repeat<nf_64,  resbottleneck_64,
-            input_type<INPUT>>>>>>>>;
+            input_processing<INPUT>>>>>>>>;
 
         // the backbones for the classic architectures
         template<typename INPUT> using backbone_18  = backbone_basicblock<1, 1, 1, 2, INPUT>;
@@ -96,7 +96,7 @@ namespace dnn::resnet
         template<typename INPUT> using backbone_101 = backbone_bottleneck<2, 22, 3, 3, INPUT>;
         template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 3, 3, INPUT>;
 
-        // the typical classifier model
+        // the typical classifier models
         using  _18  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_18<input_rgb_image>>>>;
         using  _34  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_34<input_rgb_image>>>>;
         using  _50  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_50<input_rgb_image>>>>;
@@ -121,9 +121,9 @@ namespace dnn::resnet
         template<typename SUBNET> using resbottleneck_128 = residual_block<residual, bottleneck, 128, affine, SUBNET>;
         template<typename SUBNET> using resbottleneck_64  = residual_block<residual, bottleneck,  64, affine, SUBNET>;
 
-        // common input for standard resnets
+        // common processing for standard resnet inputs
         template<typename INPUT>
-        using input_type = max_pool<3, 3, 2, 2, relu<affine<con<64, 7, 7, 2, 2, INPUT>>>>;
+        using input_processing = max_pool<3, 3, 2, 2, relu<affine<con<64, 7, 7, 2, 2, INPUT>>>>;
 
         // the resnet backbone with basicblocks
         template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
@@ -132,25 +132,25 @@ namespace dnn::resnet
             repeat<nf_256, resbasicblock_256, resbasicblock_down<256,
             repeat<nf_128, resbasicblock_128, resbasicblock_down<128,
             repeat<nf_64,  resbasicblock_64,  resbasicblock_down<64,
-            input_type<INPUT>>>>>>>>>;
+            input_processing<INPUT>>>>>>>>>;
 
-        // the resnet backbon with bottlenecks
+        // the resnet backbone with bottlenecks
         template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
         using backbone_bottleneck =
             repeat<nf_512, resbasicblock_512, resbasicblock_down<512,
             repeat<nf_256, resbasicblock_256, resbasicblock_down<256,
             repeat<nf_128, resbasicblock_128, resbasicblock_down<128,
             repeat<nf_64,  resbasicblock_64,  resbasicblock_down<64,
-            input_type<INPUT>>>>>>>>>;
+            input_processing<INPUT>>>>>>>>>;
 
         // the backbones for the classic architectures
-        template<typename INPUT> using backbone_18  = backbone_basicblock<1, 1, 1, 1, INPUT>;
+        template<typename INPUT> using backbone_18  = backbone_basicblock<1, 1, 1, 2, INPUT>;
         template<typename INPUT> using backbone_34  = backbone_basicblock<2, 5, 3, 3, INPUT>;
         template<typename INPUT> using backbone_50  = backbone_bottleneck<2, 5, 3, 3, INPUT>;
         template<typename INPUT> using backbone_101 = backbone_bottleneck<2, 22, 3, 3, INPUT>;
         template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 3, 3, INPUT>;
 
-        // the typical classifier model
+        // the typical classifier models
         using  _18  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_18<input_rgb_image>>>>;
         using  _34  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_34<input_rgb_image>>>>;
         using  _50  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_50<input_rgb_image>>>>;
