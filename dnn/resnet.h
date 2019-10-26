@@ -20,7 +20,9 @@ namespace dnn::resnet
         int stride,
         typename SUBNET
     >
-    using bottleneck = BN<con<4 * num_filters, 1, 1, 1, 1, relu<BN<con<num_filters, 3, 3, stride, stride, relu<BN<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>>>;
+    using bottleneck = BN<con<4 * num_filters, 1, 1, 1, 1,
+                  relu<BN<con<num_filters, 3, 3, stride, stride,
+                  relu<BN<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>>>;
 
     // a residual making use of the skip layer mechanism
     template<
@@ -86,15 +88,14 @@ namespace dnn::resnet
             repeat<nf_512, resbottleneck_512, resbottleneck_down<512,
             repeat<nf_256, resbottleneck_256, resbottleneck_down<256,
             repeat<nf_128, resbottleneck_128, resbottleneck_down<128,
-            repeat<nf_64,  resbottleneck_64,
-            input_processing<INPUT>>>>>>>>;
+            repeat<nf_64,  resbottleneck_64, input_processing<INPUT>>>>>>>>;
 
         // the backbones for the classic architectures
         template<typename INPUT> using backbone_18  = backbone_basicblock<1, 1, 1, 2, INPUT>;
         template<typename INPUT> using backbone_34  = backbone_basicblock<2, 5, 3, 3, INPUT>;
         template<typename INPUT> using backbone_50  = backbone_bottleneck<2, 5, 3, 3, INPUT>;
         template<typename INPUT> using backbone_101 = backbone_bottleneck<2, 22, 3, 3, INPUT>;
-        template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 7, 3, INPUT>;
 
         // the typical classifier models
         using  _18  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_18<input_rgb_image>>>>;
@@ -131,8 +132,7 @@ namespace dnn::resnet
             repeat<nf_512, resbasicblock_512, resbasicblock_down<512,
             repeat<nf_256, resbasicblock_256, resbasicblock_down<256,
             repeat<nf_128, resbasicblock_128, resbasicblock_down<128,
-            repeat<nf_64,  resbasicblock_64,  resbasicblock_down<64,
-            input_processing<INPUT>>>>>>>>>;
+            repeat<nf_64,  resbasicblock_64, input_processing<INPUT>>>>>>>>;
 
         // the resnet backbone with bottlenecks
         template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
@@ -148,7 +148,7 @@ namespace dnn::resnet
         template<typename INPUT> using backbone_34  = backbone_basicblock<2, 5, 3, 3, INPUT>;
         template<typename INPUT> using backbone_50  = backbone_bottleneck<2, 5, 3, 3, INPUT>;
         template<typename INPUT> using backbone_101 = backbone_bottleneck<2, 22, 3, 3, INPUT>;
-        template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 7, 3, INPUT>;
 
         // the typical classifier models
         using  _18  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_18<input_rgb_image>>>>;
