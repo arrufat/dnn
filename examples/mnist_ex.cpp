@@ -22,7 +22,7 @@ void print_models()
 
 template<typename NET>
 void print_accuracy(
-    NET net,
+    NET& net,
     const std::string& mode,
     const std::vector<dlib::matrix<unsigned char>>& images,
     const std::vector<unsigned long>& labels
@@ -41,12 +41,11 @@ void print_accuracy(
     std::cout << mode << " num_right: " << num_right << std::endl;
     std::cout << mode << " num_wrong: " << num_wrong << std::endl;
     std::cout << mode << " accuracy: " << num_right / static_cast<double>(num_right + num_wrong) << std::endl;
-
 }
 
 template<typename NET>
 void train_network(
-    NET net,
+    NET& net,
     unsigned long mini_batch_size,
     const std::string& model_name,
     const std::vector<dlib::matrix<unsigned char>>& training_images,
@@ -55,10 +54,11 @@ void train_network(
     const std::vector<unsigned long>& testing_labels
 )
 {
-    dnn::dnn_trainer<decltype(net)> trainer(net);
+    auto trainer = dnn::dnn_trainer(net);
     trainer.set_synchronization_file(model_name + "_sync", std::chrono::minutes(5));
     trainer.set_mini_batch_size(mini_batch_size);
     trainer.set_max_num_epochs(10);
+    trainer.set_learning_rate(0.1);
     std::cout << trainer << std::endl;
     trainer.be_verbose();
     trainer.train(training_images, training_labels);
@@ -121,51 +121,56 @@ int main(int argc, char** argv) try
     {
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
-            dnn::resnet18_backbone<
-            dnn::input<dlib::matrix<unsigned char>>
-            >>>;
-        net_type resnet;
-        train_network(resnet, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+            dnn::avg_pool_everything<
+            dnn::resnet::train::backbone_18<
+            dnn::upsample<2,
+            dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        net_type net;
+        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
     }
     else if (model_name == "resnet34")
     {
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
-            dnn::resnet34_backbone<
-            dnn::input<dlib::matrix<unsigned char>>
-            >>>;
-        net_type resnet;
-        train_network(resnet, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+            dnn::avg_pool_everything<
+            dnn::resnet::train::backbone_34<
+            dnn::upsample<2,
+            dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        net_type net;
+        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
     }
     else if (model_name == "resnet50")
     {
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
-            dnn::resnet50_backbone<
-            dnn::input<dlib::matrix<unsigned char>>
-            >>>;
-        net_type resnet;
-        train_network(resnet, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+            dnn::avg_pool_everything<
+            dnn::resnet::train::backbone_50<
+            dnn::upsample<2,
+            dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        net_type net;
+        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
     }
     else if (model_name == "resnet101")
     {
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
-            dnn::resnet101_backbone<
-            dnn::input<dlib::matrix<unsigned char>>
-            >>>;
-        net_type resnet;
-        train_network(resnet, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+            dnn::avg_pool_everything<
+            dnn::resnet::train::backbone_101<
+            dnn::upsample<2,
+            dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        net_type net;
+        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
     }
     else if (model_name == "resnet152")
     {
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
-            dnn::resnet152_backbone<
-            dnn::input<dlib::matrix<unsigned char>>
-            >>>;
-        net_type resnet;
-        train_network(resnet, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+            dnn::avg_pool_everything<
+            dnn::resnet::train::backbone_152<
+            dnn::upsample<2,
+            dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        net_type net;
+        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
     }
 
     return EXIT_SUCCESS;

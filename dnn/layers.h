@@ -42,6 +42,8 @@ namespace dnn
     using dlib::skip1, dlib::skip2;
     // add previous tagged layers
     using dlib::add_prev1, dlib::add_prev2;
+    // upsample using bilinear interpolation and integer factor
+    using dlib::upsample;
     // layer repetition
     using dlib::repeat;
     // loss functions

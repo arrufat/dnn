@@ -2,11 +2,11 @@
 
 #include "layers.h"
 
-namespace dnn
+namespace dnn::resnet
 {
     // the resnet basic block
     template<
-        int num_filters,
+        long num_filters,
         template<typename> class BN,  // some kind of batch normalization or affine layer
         int stride,
         typename SUBNET
@@ -15,7 +15,7 @@ namespace dnn
 
     // the resnet bottleneck block
     template<
-        int num_filters,
+        long num_filters,
         template<typename> class BN,  // some kind of batch normalization or affine layer
         int stride,
         typename SUBNET
@@ -24,8 +24,8 @@ namespace dnn
 
     // a residual making use of the skip layer mechanism
     template<
-        template<int, template<typename> class, int, typename> class BLOCK,  // a basic or bottleneck block defined before
-        int num_filters,
+        template<long, template<typename> class, int, typename> class BLOCK,  // a basic or bottleneck block defined before
+        long num_filters,
         template<typename> class BN,  // some kind of batch normalization or affine layer
         typename SUBNET
     > // adds the block to the result of tag1 (the subnet)
@@ -33,8 +33,8 @@ namespace dnn
 
     // a residual that does subsampling (we need to subsample the output of the subnet, too)
     template<
-        template<int, template<typename> class, int, typename> class BLOCK,  // a basic or bottleneck block defined before
-        int num_filters,
+        template<long, template<typename> class, int, typename> class BLOCK,  // a basic or bottleneck block defined before
+        long num_filters,
         template<typename> class BN,
         typename SUBNET
     >
@@ -42,236 +42,119 @@ namespace dnn
 
     // residual block with optional downsampling and batch normalization
     template<
-        template<template<int, template<typename> class, int, typename> class, int, template<typename>class, typename> class RESIDUAL,
-        template<int, template<typename> class, int, typename> class BLOCK,
-        int num_filters,
+        template<template<long, template<typename> class, int, typename> class, long, template<typename>class, typename> class RESIDUAL,
+        template<long, template<typename> class, int, typename> class BLOCK,
+        long num_filters,
         template<typename> class BN,
         typename SUBNET
     >
     using residual_block = relu<RESIDUAL<BLOCK, num_filters, BN, SUBNET>>;
 
-    template<int num_filters, typename SUBNET>
-    using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, bn_con, SUBNET>;
-    template<int num_filters, typename SUBNET>
-    using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, bn_con, SUBNET>;
-    template<int num_filters, typename SUBNET>
-    using aresbasicblock_down = residual_block<residual_down, basicblock, num_filters, affine, SUBNET>;
-    template<int num_filters, typename SUBNET>
-    using aresbottleneck_down = residual_block<residual_down, bottleneck, num_filters, affine, SUBNET>;
+    namespace train
+    {
+        template<long num_filters, typename SUBNET>
+        using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, bn_con, SUBNET>;
+        template<long num_filters, typename SUBNET>
+        using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, bn_con, SUBNET>;
 
-    // some useful definitions to allow the use of the repeat layer
-    template<typename SUBNET> using resbasicblock512 = residual_block<residual, basicblock, 512, bn_con, SUBNET>;
-    template<typename SUBNET> using resbasicblock256 = residual_block<residual, basicblock, 256, bn_con, SUBNET>;
-    template<typename SUBNET> using resbasicblock128 = residual_block<residual, basicblock, 128, bn_con, SUBNET>;
-    template<typename SUBNET> using resbasicblock64 = residual_block<residual, basicblock, 64, bn_con, SUBNET>;
-    template<typename SUBNET> using resbottleneck512 = residual_block<residual, bottleneck, 512, bn_con, SUBNET>;
-    template<typename SUBNET> using resbottleneck256 = residual_block<residual, bottleneck, 256, bn_con, SUBNET>;
-    template<typename SUBNET> using resbottleneck128 = residual_block<residual, bottleneck, 128, bn_con, SUBNET>;
-    template<typename SUBNET> using resbottleneck64 = residual_block<residual, bottleneck, 64, bn_con, SUBNET>;
+        // some definitions to allow the use of the repeat layer
+        template<typename SUBNET> using resbasicblock_512 = residual_block<residual, basicblock, 512, bn_con, SUBNET>;
+        template<typename SUBNET> using resbasicblock_256 = residual_block<residual, basicblock, 256, bn_con, SUBNET>;
+        template<typename SUBNET> using resbasicblock_128 = residual_block<residual, basicblock, 128, bn_con, SUBNET>;
+        template<typename SUBNET> using resbasicblock_64  = residual_block<residual, basicblock,  64, bn_con, SUBNET>;
+        template<typename SUBNET> using resbottleneck_512 = residual_block<residual, bottleneck, 512, bn_con, SUBNET>;
+        template<typename SUBNET> using resbottleneck_256 = residual_block<residual, bottleneck, 256, bn_con, SUBNET>;
+        template<typename SUBNET> using resbottleneck_128 = residual_block<residual, bottleneck, 128, bn_con, SUBNET>;
+        template<typename SUBNET> using resbottleneck_64  = residual_block<residual, bottleneck,  64, bn_con, SUBNET>;
 
-    // and the equivalent affine versions for inference
-    template<typename SUBNET> using aresbasicblock512 = residual_block<residual, basicblock, 512, affine, SUBNET>;
-    template<typename SUBNET> using aresbasicblock256 = residual_block<residual, basicblock, 256, affine, SUBNET>;
-    template<typename SUBNET> using aresbasicblock128 = residual_block<residual, basicblock, 128, affine, SUBNET>;
-    template<typename SUBNET> using aresbasicblock64 = residual_block<residual, basicblock, 64, affine, SUBNET>;
-    template<typename SUBNET> using aresbottleneck512 = residual_block<residual, bottleneck, 512, affine, SUBNET>;
-    template<typename SUBNET> using aresbottleneck256 = residual_block<residual, bottleneck, 256, affine, SUBNET>;
-    template<typename SUBNET> using aresbottleneck128 = residual_block<residual, bottleneck, 128, affine, SUBNET>;
-    template<typename SUBNET> using aresbottleneck64 = residual_block<residual, bottleneck, 64, affine, SUBNET>;
+        // common input for standard resnets
+        template<typename INPUT>
+        using input_type = max_pool<3, 3, 2, 2, relu<bn_con<con<64, 7, 7, 2, 2, INPUT>>>>;
 
-    // common input for standard resnets
-    template<typename INPUT>
-    using resnet_input = max_pool<3, 3, 2, 2, relu<bn_con<con<64, 7, 7, 2, 2, INPUT>>>>;
-    template<typename INPUT>
-    using aresnet_input = max_pool<3, 3, 2, 2, relu<affine<con<64, 7, 7, 2, 2, INPUT>>>>;
+        // the resnet backbone with basicblocks
+        template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
+        using backbone_basicblock =
+            repeat<nf_512, resbasicblock_512, resbasicblock_down<512,
+            repeat<nf_256, resbasicblock_256, resbasicblock_down<256,
+            repeat<nf_128, resbasicblock_128, resbasicblock_down<128,
+            repeat<nf_64,  resbasicblock_64,
+            input_type<INPUT>>>>>>>>;
 
-    // resnet 18
-    template<typename SUBNET>
-    using resnet18_level1 = resbasicblock512<resbasicblock_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using resnet18_level2 = resbasicblock256<resbasicblock_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using resnet18_level3 = resbasicblock128<resbasicblock_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using resnet18_level4 = repeat<2, resbasicblock64, SUBNET>;
-    // the resnet 18 backbone
-    template<typename INPUT>
-    using resnet18_backbone = avg_pool_everything<
-        resnet18_level1<
-        resnet18_level2<
-        resnet18_level3<
-        resnet18_level4<
-        resnet_input<INPUT>>>>>>;
-    using resnet18_t = loss_multiclass_log<fc<1000, resnet18_backbone<input_rgb_image>>>;
+        // the resnet backbon with bottlenecks
+        template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
+        using backbone_bottleneck =
+            repeat<nf_512, resbottleneck_512, resbottleneck_down<512,
+            repeat<nf_256, resbottleneck_256, resbottleneck_down<256,
+            repeat<nf_128, resbottleneck_128, resbottleneck_down<128,
+            repeat<nf_64,  resbottleneck_64,
+            input_type<INPUT>>>>>>>>;
 
-    // resnet 18 affine
-    template<typename SUBNET>
-    using aresnet18_level1 = aresbasicblock512<aresbasicblock_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet18_level2 = aresbasicblock256<aresbasicblock_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet18_level3 = aresbasicblock128<aresbasicblock_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet18_level4 = repeat<2, aresbasicblock64, SUBNET>;
-    // the resnet 18 backbone
-    template<typename INPUT>
-    using aresnet18_backbone = avg_pool_everything<
-        aresnet18_level1<
-        aresnet18_level2<
-        aresnet18_level3<
-        aresnet18_level4<
-        aresnet_input<INPUT>>>>>>;
-    using aresnet18_t = loss_multiclass_log<fc<1000, aresnet18_backbone<input_rgb_image>>>;
+        // the backbones for the classic architectures
+        template<typename INPUT> using backbone_18  = backbone_basicblock<1, 1, 1, 2, INPUT>;
+        template<typename INPUT> using backbone_34  = backbone_basicblock<2, 5, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_50  = backbone_bottleneck<2, 5, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_101 = backbone_bottleneck<2, 22, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 3, 3, INPUT>;
 
-    // resnet 34
-    template<typename SUBNET>
-    using resnet34_level1 = repeat<2, resbasicblock512, resbasicblock_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using resnet34_level2 = repeat<5, resbasicblock256, resbasicblock_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using resnet34_level3 = repeat<3, resbasicblock128, resbasicblock_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using resnet34_level4 = repeat<3, resbasicblock64, SUBNET>;
-    // the resnet 34 backbone
-    template<typename INPUT>
-    using resnet34_backbone = avg_pool_everything<
-        resnet34_level1<
-        resnet34_level2<
-        resnet34_level3<
-        resnet34_level4<
-        resnet_input<INPUT>>>>>>;
-    using resnet34_t = loss_multiclass_log<fc<1000, resnet34_backbone<input_rgb_image>>>;
+        // the typical classifier model
+        using  _18  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_18<input_rgb_image>>>>;
+        using  _34  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_34<input_rgb_image>>>>;
+        using  _50  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_50<input_rgb_image>>>>;
+        using  _101 = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_101<input_rgb_image>>>>;
+        using  _152 = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_152<input_rgb_image>>>>;
+    }
 
-    // resnet 34 affine
-    template<typename SUBNET>
-    using aresnet34_level1 = repeat<2, aresbasicblock512, aresbasicblock_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet34_level2 = repeat<5, aresbasicblock256, aresbasicblock_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet34_level3 = repeat<3, aresbasicblock128, aresbasicblock_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet34_level4 = repeat<3, aresbasicblock64, SUBNET>;
-    // the resnet 34 backbone
-    template<typename INPUT>
-    using aresnet34_backbone = avg_pool_everything<
-        aresnet34_level1<
-        aresnet34_level2<
-        aresnet34_level3<
-        aresnet34_level4<
-        aresnet_input<INPUT>>>>>>;
-    using aresnet34_t = loss_multiclass_log<fc<1000, aresnet34_backbone<input_rgb_image>>>;
+    namespace infer
+    {
+        template<long num_filters, typename SUBNET>
+        using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, affine, SUBNET>;
+        template<long num_filters, typename SUBNET>
+        using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, affine, SUBNET>;
 
-    // resnet 50
-    template<typename SUBNET>
-    using resnet50_level1 = repeat<2, resbottleneck512, resbottleneck_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using resnet50_level2 = repeat<5, resbottleneck256, resbottleneck_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using resnet50_level3 = repeat<3, resbottleneck128, resbottleneck_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using resnet50_level4 = repeat<3, resbottleneck64, SUBNET>;
-    // the resnet 50 backbone
-    template<typename INPUT>
-    using resnet50_backbone = avg_pool_everything<
-        resnet50_level1<
-        resnet50_level2<
-        resnet50_level3<
-        resnet50_level4<
-        resnet_input<INPUT>>>>>>;
-    using resnet50_t = loss_multiclass_log<fc<1000, resnet50_backbone<input_rgb_image>>>;
+        // some definitions to allow the use of the repeat layer
+        template<typename SUBNET> using resbasicblock_512 = residual_block<residual, basicblock, 512, affine, SUBNET>;
+        template<typename SUBNET> using resbasicblock_256 = residual_block<residual, basicblock, 256, affine, SUBNET>;
+        template<typename SUBNET> using resbasicblock_128 = residual_block<residual, basicblock, 128, affine, SUBNET>;
+        template<typename SUBNET> using resbasicblock_64  = residual_block<residual, basicblock,  64, affine, SUBNET>;
+        template<typename SUBNET> using resbottleneck_512 = residual_block<residual, bottleneck, 512, affine, SUBNET>;
+        template<typename SUBNET> using resbottleneck_256 = residual_block<residual, bottleneck, 256, affine, SUBNET>;
+        template<typename SUBNET> using resbottleneck_128 = residual_block<residual, bottleneck, 128, affine, SUBNET>;
+        template<typename SUBNET> using resbottleneck_64  = residual_block<residual, bottleneck,  64, affine, SUBNET>;
 
-    // resnet 50 affine
-    template<typename SUBNET>
-    using aresnet50_level1 = repeat<2, aresbottleneck512, aresbottleneck_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet50_level2 = repeat<5, aresbottleneck256, aresbottleneck_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet50_level3 = repeat<3, aresbottleneck128, aresbottleneck_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet50_level4 = repeat<3, aresbottleneck64, SUBNET>;
-    // the resnet 50 backbone
-    template<typename INPUT>
-    using aresnet50_backbone = avg_pool_everything<
-        aresnet50_level1<
-        aresnet50_level2<
-        aresnet50_level3<
-        aresnet50_level4<
-        aresnet_input<INPUT>>>>>>;
-    using aresnet50_t = loss_multiclass_log<fc<1000, aresnet50_backbone<input_rgb_image>>>;
+        // common input for standard resnets
+        template<typename INPUT>
+        using input_type = max_pool<3, 3, 2, 2, relu<affine<con<64, 7, 7, 2, 2, INPUT>>>>;
 
-    // resnet 101
-    template<typename SUBNET>
-    using resnet101_level1 = repeat<2, resbottleneck512, resbottleneck_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using resnet101_level2 = repeat<22, resbottleneck256, resbottleneck_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using resnet101_level3 = repeat<3, resbottleneck128, resbottleneck_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using resnet101_level4 = repeat<3, resbottleneck64, SUBNET>;
-    // the resnet 101 backbone
-    template<typename INPUT>
-    using resnet101_backbone = avg_pool_everything<
-        resnet101_level1<
-        resnet101_level2<
-        resnet101_level3<
-        resnet101_level4<
-        resnet_input<INPUT>>>>>>;
-    using resnet101_t = loss_multiclass_log<fc<1000, resnet101_backbone<input_rgb_image>>>;
+        // the resnet backbone with basicblocks
+        template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
+        using backbone_basicblock =
+            repeat<nf_512, resbasicblock_512, resbasicblock_down<512,
+            repeat<nf_256, resbasicblock_256, resbasicblock_down<256,
+            repeat<nf_128, resbasicblock_128, resbasicblock_down<128,
+            repeat<nf_64,  resbasicblock_64,  resbasicblock_down<64,
+            input_type<INPUT>>>>>>>>>;
 
-    // resnet 101 affine
-    template<typename SUBNET>
-    using aresnet101_level1 = repeat<2, aresbottleneck512, aresbottleneck_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet101_level2 = repeat<22, aresbottleneck256, aresbottleneck_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet101_level3 = repeat<3, aresbottleneck128, aresbottleneck_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet101_level4 = repeat<3, aresbottleneck64, SUBNET>;
-    // the resnet 101 backbone
-    template<typename INPUT>
-    using aresnet101_backbone = avg_pool_everything<
-        aresnet101_level1<
-        aresnet101_level2<
-        aresnet101_level3<
-        aresnet101_level4<
-        aresnet_input<INPUT>>>>>>;
-    using aresnet101_t = loss_multiclass_log<fc<1000, aresnet101_backbone<input_rgb_image>>>;
+        // the resnet backbon with bottlenecks
+        template<long nf_512, long nf_256, long nf_128, long nf_64, typename INPUT>
+        using backbone_bottleneck =
+            repeat<nf_512, resbasicblock_512, resbasicblock_down<512,
+            repeat<nf_256, resbasicblock_256, resbasicblock_down<256,
+            repeat<nf_128, resbasicblock_128, resbasicblock_down<128,
+            repeat<nf_64,  resbasicblock_64,  resbasicblock_down<64,
+            input_type<INPUT>>>>>>>>>;
 
-    // resnet 152
-    template<typename SUBNET>
-    using resnet152_level1 = repeat<2, resbottleneck512, resbottleneck_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using resnet152_level2 = repeat<35, resbottleneck256, resbottleneck_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using resnet152_level3 = repeat<7, resbottleneck128, resbottleneck_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using resnet152_level4 = repeat<3, resbottleneck64, SUBNET>;
-    // the resnet 152 backbone
-    template<typename INPUT>
-    using resnet152_backbone = avg_pool_everything<
-        resnet152_level1<
-        resnet152_level2<
-        resnet152_level3<
-        resnet152_level4<
-        resnet_input<INPUT>>>>>>;
-    using resnet152_t = loss_multiclass_log<fc<1000, resnet152_backbone<input_rgb_image>>>;
+        // the backbones for the classic architectures
+        template<typename INPUT> using backbone_18  = backbone_basicblock<1, 1, 1, 1, INPUT>;
+        template<typename INPUT> using backbone_34  = backbone_basicblock<2, 5, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_50  = backbone_bottleneck<2, 5, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_101 = backbone_bottleneck<2, 22, 3, 3, INPUT>;
+        template<typename INPUT> using backbone_152 = backbone_bottleneck<2, 35, 3, 3, INPUT>;
 
-    // resnet 152 affine
-    template<typename SUBNET>
-    using aresnet152_level1 = repeat<2, aresbottleneck512, aresbottleneck_down<512, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet152_level2 = repeat<35, aresbottleneck256, aresbottleneck_down<256, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet152_level3 = repeat<7, aresbottleneck128, aresbottleneck_down<128, SUBNET>>;
-    template<typename SUBNET>
-    using aresnet152_level4 = repeat<3, aresbottleneck64, SUBNET>;
-    // the resnet 152 backbone
-    template<typename INPUT>
-    using aresnet152_backbone = avg_pool_everything<
-        aresnet152_level1<
-        aresnet152_level2<
-        aresnet152_level3<
-        aresnet152_level4<
-        aresnet_input<INPUT>>>>>>;
-    using aresnet152_t = loss_multiclass_log<fc<1000, aresnet152_backbone<input_rgb_image>>>;
+        // the typical classifier model
+        using  _18  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_18<input_rgb_image>>>>;
+        using  _34  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_34<input_rgb_image>>>>;
+        using  _50  = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_50<input_rgb_image>>>>;
+        using  _101 = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_101<input_rgb_image>>>>;
+        using  _152 = loss_multiclass_log<fc<1000, avg_pool_everything<backbone_152<input_rgb_image>>>>;
+    }
 }
