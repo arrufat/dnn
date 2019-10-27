@@ -5,7 +5,7 @@
 namespace dnn
 {
     // the main vgg building block
-    template<int num_filters, template<typename> class BN, typename SUBNET>
+    template<long num_filters, template<typename> class BN, typename SUBNET>
     using vgg_block = relu<BN<con<num_filters, 3, 3, 1, 1, SUBNET>>>;
 
     // the main blocks for VGG without batch norm
