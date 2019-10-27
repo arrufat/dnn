@@ -137,11 +137,10 @@ namespace dnn::resnet
         // the resnet backbone with bottlenecks
         template<long nb_512, long nb_256, long nb_128, long nb_64, typename INPUT>
         using backbone_bottleneck =
-            repeat<nb_512, resbasicblock_512, resbasicblock_down<512,
-            repeat<nb_256, resbasicblock_256, resbasicblock_down<256,
-            repeat<nb_128, resbasicblock_128, resbasicblock_down<128,
-            repeat<nb_64,  resbasicblock_64,  resbasicblock_down<64,
-            input_processing<INPUT>>>>>>>>>;
+            repeat<nb_512, resbottleneck_512, resbottleneck_down<512,
+            repeat<nb_256, resbottleneck_256, resbottleneck_down<256,
+            repeat<nb_128, resbottleneck_128, resbottleneck_down<128,
+            repeat<nb_64,  resbottleneck_64, input_processing<INPUT>>>>>>>>>;
 
         // the backbones for the classic architectures
         template<typename INPUT> using backbone_18  = backbone_basicblock<1, 1, 1, 2, INPUT>;
