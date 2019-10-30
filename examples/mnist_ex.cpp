@@ -122,10 +122,11 @@ int main(int argc, char** argv) try
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
-            dnn::resnet::train::backbone_18<
+            dnn::resnet<dnn::bn_con>::backbone_18<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
         net_type net;
+        std::cout << net << std::endl;
         train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
     }
     else if (model_name == "resnet34")
@@ -133,7 +134,7 @@ int main(int argc, char** argv) try
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
-            dnn::resnet::train::backbone_34<
+            dnn::resnet<dnn::bn_con>::backbone_34<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
         net_type net;
@@ -144,7 +145,7 @@ int main(int argc, char** argv) try
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
-            dnn::resnet::train::backbone_50<
+            dnn::resnet<dnn::bn_con>::backbone_50<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
         net_type net;
@@ -155,7 +156,7 @@ int main(int argc, char** argv) try
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
-            dnn::resnet::train::backbone_101<
+            dnn::resnet<dnn::bn_con>::backbone_101<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
         net_type net;
@@ -166,7 +167,7 @@ int main(int argc, char** argv) try
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
-            dnn::resnet::train::backbone_152<
+            dnn::resnet<dnn::bn_con>::backbone_152<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
         net_type net;
