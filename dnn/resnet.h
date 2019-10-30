@@ -8,62 +8,51 @@ namespace dnn
     template<template<typename> class REGULARIZATION>
     struct resnet
     {
-        // the resnet basic block
-        template<
-            long num_filters,
-            template<typename> class REG,
-            int stride,
-            typename SUBNET
-        >
+        // the resnet basic block, where REG is bn_con or affine
+        template<long num_filters, template<typename> class REG, int stride, typename SUBNET>
         using basicblock = REG<con<num_filters, 3, 3, 1, 1,
                       relu<REG<con<num_filters, 3, 3, stride, stride, SUBNET>>>>>;
 
         // the resnet bottleneck block
-        template<
-            long num_filters,
-            template<typename> class REG,
-            int stride,
-            typename SUBNET
-        >
+        template<long num_filters, template<typename> class REG, int stride, typename SUBNET>
         using bottleneck = REG<con<4 * num_filters, 1, 1, 1, 1,
                       relu<REG<con<num_filters, 3, 3, stride, stride,
                       relu<REG<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>>>;
 
         // the resnet residual
         template<
-            // a basic or bottleneck block defined before
             template<long, template<typename> class, int, typename> class BLOCK, // basicblock or bottleneck
             long num_filters,
-            template<typename> class REG,  // regularization
+            template<typename> class REG, // regularization: bn_con or affine
             typename SUBNET
         > // adds the block to the result of tag1 (the subnet)
         using residual = add_prev1<BLOCK<num_filters, REG, 1, tag1<SUBNET>>>;
 
-        // a residual that does subsampling (we need to subsample the output of the subnet, too)
+        // a resnet residual that does subsampling on both paths
         template<
-            template<long, template<typename> class, int, typename> class BLOCK,  // basicblock or bottleneck
+            template<long, template<typename> class, int, typename> class BLOCK, // basicblock or bottleneck
             long num_filters,
-            template<typename> class REG,
+            template<typename> class REG, // regularization: bn_con or affine
             typename SUBNET
         >
         using residual_down = add_prev2<avg_pool<2, 2, 2, 2,
                               skip1<tag2<BLOCK<num_filters, REG, 2,
                               tag1<SUBNET>>>>>>;
 
-        // residual block with optional downsampling and batch normalization
+        // residual block with optional downsampling and custom regularization (bn_con or affine)
         template<
             template<template<long, template<typename> class, int, typename> class, long, template<typename>class, typename> class RESIDUAL,
             template<long, template<typename> class, int, typename> class BLOCK,
             long num_filters,
-            template<typename> class BN,
+            template<typename> class REG, // regularization: bn_con or affine
             typename SUBNET
         >
-        using residual_block = relu<RESIDUAL<BLOCK, num_filters, BN, SUBNET>>;
+        using residual_block = relu<RESIDUAL<BLOCK, num_filters, REG, SUBNET>>;
 
         template<long num_filters, typename SUBNET>
-        using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, bn_con, SUBNET>;
+        using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, REGULARIZATION, SUBNET>;
         template<long num_filters, typename SUBNET>
-        using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, bn_con, SUBNET>;
+        using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, REGULARIZATION, SUBNET>;
 
         // some definitions to allow the use of the repeat layer
         template<typename SUBNET> using resbasicblock_512 = residual_block<residual, basicblock, 512, REGULARIZATION, SUBNET>;
