@@ -10,7 +10,7 @@ namespace dnn::vgg
 
     // the final fc layers of vgg
     template<typename SUBNET>
-    using final_fc = fc<1000, fc<4095, fc<4096, SUBNET>>>;
+    using final_fc = fc<1000, fc<4096, fc<4096, SUBNET>>>;
 
     namespace bn::train
     {
