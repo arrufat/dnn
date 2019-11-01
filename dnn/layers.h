@@ -33,7 +33,7 @@ namespace dnn
     // average and max pooling for everything
     using dlib::avg_pool_everything, dlib::max_pool_everything;
     // batch normalization and affine
-    using dlib::bn_con, dlib::bn_fc, dlib::affine;
+    using dlib::bn_con, dlib::bn_fc, dlib::affine, dlib::multiply, dlib::dropout;
     // activations
     using dlib::relu, dlib::sig, dlib::htan;
     // tag operations
