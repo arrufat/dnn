@@ -4,39 +4,39 @@
 
 namespace dnn
 {
-    // regularization must be bn_con or affine
-    template<template<typename> class REGULARIZATION>
+    // The generic ResNet where BATCHNORM must be bn_con or affine layer
+    template<template<typename> class BATCHNORM>
     struct resnet
     {
         // the resnet basic block, where REG is bn_con or affine
-        template<long num_filters, template<typename> class REG, int stride, typename SUBNET>
-        using basicblock = REG<con<num_filters, 3, 3, 1, 1,
-                      relu<REG<con<num_filters, 3, 3, stride, stride, SUBNET>>>>>;
+        template<long num_filters, template<typename> class BN, int stride, typename SUBNET>
+        using basicblock = BN<con<num_filters, 3, 3, 1, 1,
+                      relu<BN<con<num_filters, 3, 3, stride, stride, SUBNET>>>>>;
 
         // the resnet bottleneck block
-        template<long num_filters, template<typename> class REG, int stride, typename SUBNET>
-        using bottleneck = REG<con<4 * num_filters, 1, 1, 1, 1,
-                      relu<REG<con<num_filters, 3, 3, stride, stride,
-                      relu<REG<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>>>;
+        template<long num_filters, template<typename> class BN, int stride, typename SUBNET>
+        using bottleneck = BN<con<4 * num_filters, 1, 1, 1, 1,
+                      relu<BN<con<num_filters, 3, 3, stride, stride,
+                      relu<BN<con<num_filters, 1, 1, 1, 1, SUBNET>>>>>>>>;
 
         // the resnet residual
         template<
             template<long, template<typename> class, int, typename> class BLOCK, // basicblock or bottleneck
             long num_filters,
-            template<typename> class REG, // regularization: bn_con or affine
+            template<typename> class BN, // regularization: bn_con or affine
             typename SUBNET
         > // adds the block to the result of tag1 (the subnet)
-        using residual = add_prev1<BLOCK<num_filters, REG, 1, tag1<SUBNET>>>;
+        using residual = add_prev1<BLOCK<num_filters, BN, 1, tag1<SUBNET>>>;
 
         // a resnet residual that does subsampling on both paths
         template<
             template<long, template<typename> class, int, typename> class BLOCK, // basicblock or bottleneck
             long num_filters,
-            template<typename> class REG, // regularization: bn_con or affine
+            template<typename> class BN, // regularization: bn_con or affine
             typename SUBNET
         >
         using residual_down = add_prev2<avg_pool<2, 2, 2, 2,
-                              skip1<tag2<BLOCK<num_filters, REG, 2,
+                              skip1<tag2<BLOCK<num_filters, BN, 2,
                               tag1<SUBNET>>>>>>;
 
         // residual block with optional downsampling and custom regularization (bn_con or affine)
@@ -44,25 +44,25 @@ namespace dnn
             template<template<long, template<typename> class, int, typename> class, long, template<typename>class, typename> class RESIDUAL,
             template<long, template<typename> class, int, typename> class BLOCK,
             long num_filters,
-            template<typename> class REG, // regularization: bn_con or affine
+            template<typename> class BN, // regularization: bn_con or affine
             typename SUBNET
         >
-        using residual_block = relu<RESIDUAL<BLOCK, num_filters, REG, SUBNET>>;
+        using residual_block = relu<RESIDUAL<BLOCK, num_filters, BN, SUBNET>>;
 
         template<long num_filters, typename SUBNET>
-        using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, REGULARIZATION, SUBNET>;
+        using resbasicblock_down = residual_block<residual_down, basicblock, num_filters, BATCHNORM, SUBNET>;
         template<long num_filters, typename SUBNET>
-        using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, REGULARIZATION, SUBNET>;
+        using resbottleneck_down = residual_block<residual_down, bottleneck, num_filters, BATCHNORM, SUBNET>;
 
         // some definitions to allow the use of the repeat layer
-        template<typename SUBNET> using resbasicblock_512 = residual_block<residual, basicblock, 512, REGULARIZATION, SUBNET>;
-        template<typename SUBNET> using resbasicblock_256 = residual_block<residual, basicblock, 256, REGULARIZATION, SUBNET>;
-        template<typename SUBNET> using resbasicblock_128 = residual_block<residual, basicblock, 128, REGULARIZATION, SUBNET>;
-        template<typename SUBNET> using resbasicblock_64  = residual_block<residual, basicblock,  64, REGULARIZATION, SUBNET>;
-        template<typename SUBNET> using resbottleneck_512 = residual_block<residual, bottleneck, 512, REGULARIZATION, SUBNET>;
-        template<typename SUBNET> using resbottleneck_256 = residual_block<residual, bottleneck, 256, REGULARIZATION, SUBNET>;
-        template<typename SUBNET> using resbottleneck_128 = residual_block<residual, bottleneck, 128, REGULARIZATION, SUBNET>;
-        template<typename SUBNET> using resbottleneck_64  = residual_block<residual, bottleneck,  64, REGULARIZATION, SUBNET>;
+        template<typename SUBNET> using resbasicblock_512 = residual_block<residual, basicblock, 512, BATCHNORM, SUBNET>;
+        template<typename SUBNET> using resbasicblock_256 = residual_block<residual, basicblock, 256, BATCHNORM, SUBNET>;
+        template<typename SUBNET> using resbasicblock_128 = residual_block<residual, basicblock, 128, BATCHNORM, SUBNET>;
+        template<typename SUBNET> using resbasicblock_64  = residual_block<residual, basicblock,  64, BATCHNORM, SUBNET>;
+        template<typename SUBNET> using resbottleneck_512 = residual_block<residual, bottleneck, 512, BATCHNORM, SUBNET>;
+        template<typename SUBNET> using resbottleneck_256 = residual_block<residual, bottleneck, 256, BATCHNORM, SUBNET>;
+        template<typename SUBNET> using resbottleneck_128 = residual_block<residual, bottleneck, 128, BATCHNORM, SUBNET>;
+        template<typename SUBNET> using resbottleneck_64  = residual_block<residual, bottleneck,  64, BATCHNORM, SUBNET>;
 
         // common processing for standard resnet inputs
         template<typename INPUT>
