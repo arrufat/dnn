@@ -1,15 +1,15 @@
-#include <iostream>
-
-#include <dlib/cmd_line_parser.h>
-#include <dlib/data_io.h>
-
 #include "resnet.h"
 #include "training.h"
 
-const std::vector<std::string> models =
-{
-    "resnet18", "resnet34", "resnet50", "resnet101", "resnet152"
-};
+#include <dlib/cmd_line_parser.h>
+#include <dlib/data_io.h>
+#include <iostream>
+
+const std::vector<std::string> models = {"resnet18",
+                                         "resnet34",
+                                         "resnet50",
+                                         "resnet101",
+                                         "resnet152"};
 
 void print_models()
 {
@@ -20,13 +20,11 @@ void print_models()
     }
 }
 
-template<typename NET>
-void print_accuracy(
-    NET& net,
+template <typename net_type> void print_accuracy(
+    net_type& net,
     const std::string& mode,
     const std::vector<dlib::matrix<unsigned char>>& images,
-    const std::vector<unsigned long>& labels
-    )
+    const std::vector<unsigned long>& labels)
 {
     auto predicted_labels = net(images);
     int num_right = 0;
@@ -40,19 +38,18 @@ void print_accuracy(
     }
     std::cout << mode << " num_right: " << num_right << std::endl;
     std::cout << mode << " num_wrong: " << num_wrong << std::endl;
-    std::cout << mode << " accuracy: " << num_right / static_cast<double>(num_right + num_wrong) << std::endl;
+    std::cout << mode << " accuracy: " << num_right / static_cast<double>(num_right + num_wrong)
+              << std::endl;
 }
 
-template<typename NET>
-void train_network(
-    NET& net,
+template <typename net_type> void train_network(
+    net_type& net,
     unsigned long mini_batch_size,
     const std::string& model_name,
     const std::vector<dlib::matrix<unsigned char>>& training_images,
     const std::vector<unsigned long>& training_labels,
     const std::vector<dlib::matrix<unsigned char>>& testing_images,
-    const std::vector<unsigned long>& testing_labels
-)
+    const std::vector<unsigned long>& testing_labels)
 {
     auto trainer = dnn::dnn_trainer(net);
     trainer.set_synchronization_file(model_name + "_sync", std::chrono::minutes(5));
@@ -68,7 +65,8 @@ void train_network(
     print_accuracy(net, "testing", testing_images, testing_labels);
 }
 
-int main(int argc, char** argv) try
+auto main(const int argc, const char** argv) -> int
+try
 {
     dlib::command_line_parser parser;
     parser.add_option("model", "the network architecture to use", 1);
@@ -104,79 +102,130 @@ int main(int argc, char** argv) try
     if (model_idx == models.end())
     {
         std::cout << "Model \"" << model_name << "\" is unsupported." << std::endl;
-        std::cout << "Use --list-models for a list of all supported network architectures." << std::endl;
+        std::cout << "Use --list-models for a list of all supported network architectures."
+                  << std::endl;
         return EXIT_FAILURE;
     }
 
     // load the MNIST dataset
     std::string mnist_root = dlib::get_option(parser, "mnist-root", "mnist");
     std::vector<dlib::matrix<unsigned char>> training_images;
-    std::vector<unsigned long>         training_labels;
+    std::vector<unsigned long> training_labels;
     std::vector<dlib::matrix<unsigned char>> testing_images;
-    std::vector<unsigned long>         testing_labels;
-    dlib::load_mnist_dataset(mnist_root, training_images, training_labels, testing_images, testing_labels);
+    std::vector<unsigned long> testing_labels;
+    dlib::load_mnist_dataset(
+        mnist_root,
+        training_images,
+        training_labels,
+        testing_images,
+        testing_labels);
 
     unsigned long mini_batch_size = dlib::get_option(parser, "mini-batch-size", 32);
     if (model_name == "resnet18")
     {
+        // clang-format off
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
             dnn::resnet<dnn::bn_con>::backbone_18<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        // clang-format on
         net_type net;
         std::cout << net << std::endl;
-        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+        train_network(
+            net,
+            mini_batch_size,
+            model_name,
+            training_images,
+            training_labels,
+            testing_images,
+            testing_labels);
     }
     else if (model_name == "resnet34")
     {
+        // clang-format off
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
             dnn::resnet<dnn::bn_con>::backbone_34<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        // clang-format on
         net_type net;
-        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+        train_network(
+            net,
+            mini_batch_size,
+            model_name,
+            training_images,
+            training_labels,
+            testing_images,
+            testing_labels);
     }
     else if (model_name == "resnet50")
     {
+        // clang-format off
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
             dnn::resnet<dnn::bn_con>::backbone_50<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        // clang-format on
         net_type net;
-        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+        train_network(
+            net,
+            mini_batch_size,
+            model_name,
+            training_images,
+            training_labels,
+            testing_images,
+            testing_labels);
     }
     else if (model_name == "resnet101")
     {
+        // clang-format off
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
             dnn::resnet<dnn::bn_con>::backbone_101<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        // clang-format on
         net_type net;
-        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+        train_network(
+            net,
+            mini_batch_size,
+            model_name,
+            training_images,
+            training_labels,
+            testing_images,
+            testing_labels);
     }
     else if (model_name == "resnet152")
     {
+        // clang-format off
         using net_type = dnn::loss_multiclass_log<
             dnn::fc<10,
             dnn::avg_pool_everything<
             dnn::resnet<dnn::bn_con>::backbone_152<
             dnn::upsample<2,
             dnn::input<dlib::matrix<unsigned char>>>>>>>;
+        // clang-format on
         net_type net;
-        train_network(net, mini_batch_size, model_name, training_images, training_labels, testing_images, testing_labels);
+        train_network(
+            net,
+            mini_batch_size,
+            model_name,
+            training_images,
+            training_labels,
+            testing_images,
+            testing_labels);
     }
 
     return EXIT_SUCCESS;
 }
-catch (std::exception& e)
+catch (const std::exception& e)
 {
     std::cout << e.what() << std::endl;
     return EXIT_FAILURE;
